@@ -95,10 +95,19 @@ data$Reg11 <- as.numeric(data$Reg11)
 data <- data %>% mutate(promotion =((6-Reg1) + Reg3 + Reg7 + (6-Reg9) + Reg10 + (6-Reg11))/ 6) %>% 
                  mutate(prevention =((6-Reg2) + (6-Reg4) + Reg5 + (6-Reg6) + (6-Reg8)) / 5)
 
-mean(data1$promotion)
+
+
+mean(data$promotion,na.rm = T)
+mean(data$prevention,na.rm = T)
+
+propre <- na.omit(data[,c("promotion", "prevention")])
+
+
+
+cor(propre$promotion,propre$prevention)
 
 data1 <- data %>% filter(Last.page==5)
 
-### Regulatory Focus
-datareg <- data %>% select(user_UUID,Reg1,Reg2,Reg3,Reg4,Reg5,Reg6,Reg7, Reg8,Reg9,Reg10, Reg11)
-rm(data)
+#Motivation Ranking
+ggplot(data.entry())
+df <- as.data.frame(summary(as.factor(data$Rank1)))
