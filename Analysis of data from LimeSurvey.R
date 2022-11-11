@@ -17,7 +17,8 @@ all_data <- all_data %>%  rename(Consent = I.GIVE.MY.CONSENT.to.participate.in.t
 
 #y <- data[data$user_UUID %in% unique(Reports_2022$V1), ]
 
-colnames(data)
+
+#Turning Regulatory focus answers to results
 
 all_data$Reg1[all_data$Reg1 == "[1] Never/Seldom"] <- 1
 all_data$Reg1[all_data$Reg1 == "[2] Rarely"] <- 2
@@ -99,15 +100,16 @@ all_data$Reg11 <- as.numeric(all_data$Reg11)
 
 all_data <- all_data %>% mutate(promotion =((6-Reg1) + Reg3 + Reg7 + (6-Reg9) + Reg10 + (6-Reg11))/ 6) %>% 
                  mutate(prevention =((6-Reg2) + (6-Reg4) + Reg5 + (6-Reg6) + (6-Reg8)) / 5)
+k <- as.data.frame(table(data$user_UUID))
 
 
 data <-  all_data[all_data$Consent == 'Yes',]
 
 vec <- data$user_UUID
-Reports <-  x[x$user_id %in% vec,]
+Reports <-  Reports_2022[Reports_2022$user_id %in% vec,]
 
 count <- as.data.frame(table(Reports$user_id))
-table(Reports$user_id, Reports$V3)
+ table(Reports$user_id, Reports$V3)
 y<- as.data.frame(table(Reports$user_id, Reports$V3))
 
 mean(data$promotion,na.rm = T)
