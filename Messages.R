@@ -28,7 +28,7 @@ last_msg <- message_data %>%
   arrange(desc(msg_date)) %>% 
   slice(1L) %>% 
   select(-msg_nmbr,-acknowledged)%>% 
-  rename(last_msg_date = msg_date)
+  rename(last_msg_date = msg_date, msg_type = type)
 
 #create a data frame to extract  count of messages read
 read_count <- as.data.frame(table(message_data$user_id, message_data$acknowledged))  %>% 
@@ -41,5 +41,7 @@ Messages <- reduce(df_list, full_join, by='user_id')
 
 #clean now redundant dataframes from environment  
 rm(df_list,first_msg,last_msg,read_count)  
+
+
 
          
