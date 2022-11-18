@@ -61,10 +61,11 @@ Reports <- Reports %>%
 
 
 #by report type
-n <- Reports %>% 
-  pivot_wider(names_from = report_type, values_from = report_type) 
+n <- Reports %>%
+  select(-report_date,-report_count) %>% 
+  group_by(report_type)
 
+n <-table(user_id,report_type)
 
-%>% 
-  mutate(report_count = n())
-
+n <- as.data.frame(table(n$user_id, n$report_type))
+m <- n %>% pivot_wider(names_from = Var2, values_from = Freq)
