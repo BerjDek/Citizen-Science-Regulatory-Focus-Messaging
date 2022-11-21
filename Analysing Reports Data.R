@@ -60,12 +60,28 @@ Reports <- Reports %>%
               select(-report_id)
 
 
-#by report type
-n <- Reports %>%
-  select(-report_date,-report_count) %>% 
-  group_by(report_type)
+#by report type (will be added to messages dataframe)
+Report_Number_Type <- Reports %>%
+                      select(-report_date,-report_count) %>% 
+                      group_by(report_type)
 
-n <-table(user_id,report_type)
 
-n <- as.data.frame(table(n$user_id, n$report_type))
-m <- n %>% pivot_wider(names_from = Var2, values_from = Freq)
+Report_Number_Type <- as.data.frame(table(Report_Number_Type$user_id, Report_Number_Type$report_type))
+
+Report_Number_Type <- Report_Number_Type %>% pivot_wider(names_from = Var2, values_from = Freq)%>% 
+                                             rename(user_id = Var1, bite_report = bite, site_report = site, adult_report = adult) %>% 
+                                             mutate(total_reports = (bite_report+ adult_report+ site_report))
+
+#by report date
+
+o <- left_join(Reports,Messages, by = "user_id") %>% 
+     select(user_id, report_date, first_msg_date, last_msg_date) %>% 
+     mutate(report_before_msg = case_when(report_date < first_msg_date ~ 1, report_date > first_msg_date ~ 0)) %>% 
+     mutate(report_during_msg = case_when(report_date > first_msg_date & report_date < last_msg_date ~ 1, report_date < first_msg_date | report_date > last_msg_date ~ 0))%>% 
+     mutate(report_after_msg = case_when(report_date > last_msg_date ~ 1, report_date < last_msg_date ~ 0))
+
+m <-o %>% 
+  group_by(user_id)
+
+
+
