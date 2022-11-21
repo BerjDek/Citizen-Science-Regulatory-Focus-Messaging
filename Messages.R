@@ -42,6 +42,7 @@ Messages <- reduce(df_list, full_join, by='user_id')
 #clean now redundant dataframes from environment  
 rm(df_list,first_msg,last_msg,read_count)  
 
+#attach report type and number to data set
+Messages <- full_join(Messages,Report_Number_Type, by = "user_id") %>% 
+  mutate(bite_report = coalesce(bite_report, 0), site_report = coalesce(site_report, 0), adult_report = coalesce(adult_report,0), total_reports = coalesce(total_reports,0))
 
-
-         
