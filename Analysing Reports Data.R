@@ -36,7 +36,7 @@ UUID_Conv <- read.csv(file="user_reports_091122.csv", header = TRUE) %>%
 Reports_2022 <- inner_join(Reports_2022, UUID_Conv, by = "report_id") 
 
 #Selecting the columns important for 
-Reports <- Reports_2022 %>% 
+Reports_2022 <- Reports_2022 %>% 
            select(user_id, report_id, report_date, report_type)
             
 
@@ -48,7 +48,7 @@ Reports <- Reports_2022 %>%
 #Extract a vector of all user Id's of those of who participated in the survey (data loaded in another Tab)
 vec <- data$user_id
 #Reduce the reports to only those that have been given by those who have filled the survey
-Reports <-  Reports[Reports$user_id %in% vec,]
+Reports <-  Reports_2022[Reports_2022$user_id %in% vec,]
 
 #percentage of reports coming from those who participated in the survey
 count(Reports)/count(Reports_2022)*100
@@ -74,14 +74,37 @@ Report_Number_Type <- Report_Number_Type %>% pivot_wider(names_from = Var2, valu
 
 #by report date
 
-o <- left_join(Reports,Messages, by = "user_id") %>% 
-     select(user_id, report_date, first_msg_date, last_msg_date) %>% 
-     mutate(report_before_msg = case_when(report_date < first_msg_date ~ 1, report_date > first_msg_date ~ 0)) %>% 
-     mutate(report_during_msg = case_when(report_date > first_msg_date & report_date < last_msg_date ~ 1, report_date < first_msg_date | report_date > last_msg_date ~ 0))%>% 
-     mutate(report_after_msg = case_when(report_date > last_msg_date ~ 1, report_date < last_msg_date ~ 0))
+Report_date <- left_join(Reports,Messages, by = "user_id") %>% 
+  select(user_id, report_date, first_msg_date, last_msg_date) %>% 
+  mutate(month_before = first_msg_date - 26 ) %>% 
+  mutate(month_after = last_msg_date + 26) %>% 
+  mutate(report_before_msg = case_when(report_date < month_before ~ 0, report_date < first_msg_date & report_date >= month_before ~ 1, report_date >= first_msg_date ~ 0)) %>% 
+  mutate(report_during_msg = case_when(report_date >= first_msg_date & report_date <= last_msg_date ~ 1, report_date < first_msg_date | report_date > last_msg_date ~ 0))%>% 
+  mutate(report_after_msg = case_when(report_date <= last_msg_date ~ 0, report_date > last_msg_date & report_date <= month_after ~ 1,report_date > month_after ~ 0 )) %>% 
+  group_by(user_id) %>%
+  mutate(before = sum(report_before_msg))%>%
+  mutate(during = sum(report_during_msg))%>%
+  mutate(after = sum(report_after_msg))
 
-m <-o %>% 
-  group_by(user_id)
 
+###o<- left_join(Reports,Messages, by = "user_id") %>% 
+  select(user_id, report_date, first_msg_date, last_msg_date) %>% 
+  mutate(month_before = first_msg_date - 26 ) %>% 
+  mutate(month_after = last_msg_date + 26) %>% 
+  mutate(report_before_msg = case_when(report_date < month_before ~ 0, report_date < first_msg_date & report_date >= month_before ~ 1, report_date >= first_msg_date ~ 0)) %>% 
+  mutate(report_during_msg = case_when(report_date >= first_msg_date & report_date <= last_msg_date ~ 1, report_date < first_msg_date | report_date > last_msg_date ~ 0))%>% 
+  mutate(report_after_msg = case_when(report_date <= last_msg_date ~ 0, report_date > last_msg_date & report_date <= month_after ~ 1,report_date > month_after ~ 0 )) %>% 
+  group_by(user_id) %>%
+  mutate(before = sum(report_before_msg))%>%
+  mutate(during = sum(report_during_msg))%>%
+  mutate(after = sum(report_after_msg))
 
+o <- Reports_2022 %>% 
+  select(user_id, report_date) 
 
+o <- left_join(o, Messages,"user_id") %>% 
+    select(user_id, report_date, first_msg_date, last_msg_date)
+
+o$first_msg_date <- Messages$first_msg_date[match(o$user_id,Messages$user_id)];
+o$last_msg_date <- Messages$last_msg_date[match(o$user_id,Messages$user_id)];
+  
